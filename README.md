@@ -6,7 +6,7 @@ Posterior samples required to parameterize the closed loop simulations are avail
 
 >Staton B., M. Catalano, B.M. Connors, L. Coggins, M. Jones, C. Walters, S. Fleischman and D. Gwinn. In preparation. Evaluation of methods for quantifying population diversity in mixed-stock Pacific salmon fisheries.
 
-
+Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable Salmon Initiative](https://www.aykssi.org/)
 
 ## Files
 - `make.R`: All code required to reproduce current set of simulations and figures.
