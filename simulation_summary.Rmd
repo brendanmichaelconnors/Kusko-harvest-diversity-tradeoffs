@@ -1,0 +1,601 @@
+---
+output:
+  pdf_document: default
+  keep_tex: yes
+  word_document: default
+  html_document: default
+---
+
+##Kuskokwim harvest-diversity simulations
+`r Sys.Date()`
+
+```{r setup, include=FALSE}
+source("Load.R")
+# set harvest and escapement goals for alternative policies
+adj <- 1.78 # expantion for unmonitored substocks
+
+harvest_goal <- seq(1000,100000*adj,length.out=40)
+egfloor <- seq(1,100000*adj,length.out=40)
+
+pol.1x<-75; pol.1x.ind <- which(abs((egfloor/1000)-pol.1x)==min(abs((egfloor/1000)-pol.1x)))
+pol.1y<-170; pol.1y.ind <- which(abs((harvest_goal/1000)-pol.1y)==min(abs((harvest_goal/1000)-pol.1y)))
+
+pol.2x<-5; pol.2x.ind <- which(abs((egfloor/1000)-pol.2x)==min(abs((egfloor/1000)-pol.2x)))
+pol.2y<-65; pol.2y.ind <- which(abs((harvest_goal/1000)-pol.2y)==min(abs((harvest_goal/1000)-pol.2y)))
+
+pol.3x<-135; pol.3x.ind <- which(abs((egfloor/1000)-pol.3x)==min(abs((egfloor/1000)-pol.3x)))
+pol.3y<-170; pol.3y.ind <- which(abs((harvest_goal/1000)-pol.3y)==min(abs((harvest_goal/1000)-pol.3y)))
+
+# load simulation output
+
+#outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.May312019")
+#outcomes <- readRDS("outputs/alt_vul_sims.ny_50.SR_rick.sim_500.TV_false.July32019")
+outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_true.May312019")
+
+outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
+outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.75),na.rm=T)
+outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.25),na.rm=T)
+
+```
+
+```{r opts, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.path = "images/"
+)
+```
+
+```{r  fig1, echo=FALSE,fig.height = 5.5, fig.width = 6.5, fig.align = "center"}
+par(mfrow=c(2,2),bty="o", mar=c(2,2,2,5),oma=c(2,2,1,1))#set dimensions to plots
+
+#panel a - harvest
+xx<-as.table((outcomes.med[,2,]/1000)*adj)
+colnames(xx)<-((harvest_goal/1000))
+rownames(xx)<-((egfloor/1000))
+long.data <- as.data.frame(xx)
+x <- as.numeric(paste(long.data[,1]))
+y <- as.numeric(paste(long.data[,2]))
+z <-as.numeric(long.data[,3])
+data.loess = loess(z~x*y)
+grid = expand.grid(list(x = (egfloor/1000), y = (harvest_goal/1000)))
+zz<-as.matrix(predict(data.loess, newdata = grid))
+xx<-(egfloor/1000)
+yy<-(harvest_goal/1000)
+
+image(xx,yy,zz,axes=F,ylab="",xlab="",col=rev(viridis(100)))
+axis(1,at=c(0,40,80,120,160),labels=F)
+axis(2,las=2,at=c(0,40,80,120,160))
+mtext("(a) Harvest (000s fish)",3,cex=0.9,line=0.5,adj=0)
+image.plot(xx,yy,zz,axes=F,add=T,legend.mar=3,col=rev(viridis(100)),zlim=c(0,125),legend.width = 2)
+box(col="black")
+
+points(pol.2x,pol.2y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.2x,pol.2y,"2",cex=0.8)
+
+points(pol.1x,pol.1y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.1x,pol.1y,"1",cex=0.8)
+
+points(pol.3x,pol.3y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.3x,pol.3y,"3",cex=0.8)
+
+#panel b - CV
+outcomes.med[,8,] <- ifelse(outcomes.med[,8,]>3,3,outcomes.med[,8,])
+xx<-as.table(1/outcomes.med[,8,])
+colnames(xx)<-((harvest_goal/1000))
+rownames(xx)<-((egfloor/1000))
+long.data <- as.data.frame(xx)
+x <- as.numeric(paste(long.data[,1]))
+y <- as.numeric(paste(long.data[,2])) 
+z <-as.numeric(long.data[,3])
+data.loess = loess(z~x*y)
+grid = expand.grid(list(x = (egfloor/1000) , y = (harvest_goal/1000) ))
+zz<-as.matrix(predict(data.loess, newdata = grid))
+xx<-(egfloor/1000) 
+yy<-(harvest_goal/1000) 
+
+image(xx,yy,zz,axes=F,ylab="",xlab="")
+axis(1,at=c(0,40,80,120,160),labels=F)
+axis(2,las=2,labels=F)
+mtext("(b) Harvest stability (1/CV)",3,cex=0.9,line=0.5,adj=0)
+image.plot(xx,yy,zz,axes=F,add=T,legend.mar=3,col=rev(viridis(100)),legend.width = 2)
+box(col="black")
+
+points(pol.2x,pol.2y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.2x,pol.2y,"2",cex=0.8)
+
+points(pol.1x,pol.1y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.1x,pol.1y,"1",cex=0.8)
+
+points(pol.3x,pol.3y,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.3x,pol.3y,"3",cex=0.8)
+
+
+#panel c - trib goals
+xx<-as.table(outcomes.med[,9,]*100)
+colnames(xx)<-((harvest_goal/1000) )
+rownames(xx)<-((egfloor/1000) )
+long.data <- as.data.frame(xx)
+x <- as.numeric(paste(long.data[,1])) 
+y <- as.numeric(paste(long.data[,2])) 
+z <-as.numeric(long.data[,3])
+data.loess = loess(z~x*y)
+grid = expand.grid(list(x = (egfloor/1000) , y = (harvest_goal/1000) ))
+zz<-as.matrix(predict(data.loess, newdata = grid))
+xx<-(egfloor/1000) 
+yy<-(harvest_goal/1000) 
+zz[zz <0] =0 
+zz[zz >100] =100 
+
+image(xx,yy,zz,axes=F,ylab="",xlab="",zlim=c(0,100))
+axis(1,at=c(0,40,80,120,160),las=1)
+axis(2,las=2,at=c(0,40,80,120,160))
+mtext("(c) Chance tributary goals met (%)",3,cex=0.9,line=0.5,adj=0)
+image.plot(xx,yy,zz,axes=F,add=T,legend.mar=3,zlim=c(0,100),col=rev(viridis(100)),legend.width = 2)
+box(col="black")
+
+points(pol.2x ,pol.2y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.2x ,pol.2y ,"2",cex=0.8)
+
+points(pol.1x ,pol.1y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.1x ,pol.1y ,"1",cex=0.8)
+
+points(pol.3x ,pol.3y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.3x ,pol.3y ,"3",cex=0.8)
+
+#panel d - extirpated
+xx<-as.table(outcomes.med[,6,]*100)
+colnames(xx)<-((harvest_goal/1000) )
+rownames(xx)<-((egfloor/1000) )
+long.data <- as.data.frame(xx)
+x <- as.numeric(paste(long.data[,1])) 
+y <- as.numeric(paste(long.data[,2])) 
+z <-as.numeric(long.data[,3])
+data.loess = loess(z~x*y)
+grid = expand.grid(list(x = (egfloor/1000) , y = (harvest_goal/1000) ))
+zz<-as.matrix(predict(data.loess, newdata = grid))
+xx<-(egfloor/1000) 
+yy<-(harvest_goal/1000) 
+zz[zz <0] =0 
+zz[zz >100] =100 
+
+image(xx,yy,zz,axes=F,ylab="",xlab="",zlim=c(0,100))
+
+axis(1,at=c(0,40,80,120,160),las=1)
+axis(2,las=2,labels=F)
+mtext("(d) Populations extirpated (%)",3,cex=0.9,line=0.5,adj=0)
+image.plot(xx,yy,zz,axes=F,add=T,legend.mar=3,zlim=c(0,100),col=viridis(100),legend.width = 2)
+box(col="black")
+
+points(pol.2x ,pol.2y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.2x ,pol.2y ,"2",cex=0.8)
+
+points(pol.1x ,pol.1y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.1x ,pol.1y ,"1",cex=0.8)
+
+points(pol.3x ,pol.3y ,pch=21,cex=2.2,bg="grey",lwd=2)
+text(pol.3x ,pol.3y ,"3",cex=0.8)
+
+mtext("Escapement goal (000s)",1,outer=T,cex=1.1,lin=0.75)
+mtext("Harvest goal (000s)",side=2,outer=T,cex=1.1,line=0.75)
+```
+Figure 1. **Predicted consequences of alternative harvest policies**. Each policy is defined by a combination of basin scale harvest (y-axis) and escapement goals (x-axis). Performance measures (z-axis) are calculated over the last 20 years of each Monte Carlo trial (500 in total), which project stock dynamics 50 years forward in time, and correspond to (A) median harvest (in thousands of Chinook salmon), (B) harvest stability (1/ coefficient of variation [CV] in harvest), (C) proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner target (S~MSY~) and (D) proportion of sub-stocks extirpated. Three illustrative harvest policies are overlaid on each panel: (1) a policy that seeks to maximize yield, (2) a fixed harvest policy corresponding to minimum subsistence needs and (3) a policy that seeks to reduce biological risks to sub-stocks while also achieving relatively high harvests. 
+
+```{r  fig2, echo=FALSE,fig.height = 5, fig.width = 4.5, fig.align = "center"}
+par(mfrow=c(2,2),bty="o", mar=c(1,2,2,4),oma=c(2,2.5,1,0))#set dimensions to plots
+
+har <- c(((outcomes.med[,2,]/1000)*adj)[pol.1x.ind,pol.1y.ind],(outcomes.med[,2,]/1000*adj)[pol.2x.ind,pol.2y.ind],(outcomes.med[,2,]/1000*adj)[pol.3x.ind,pol.3y.ind])
+har.up <- c((outcomes.upper[,2,]/1000*adj)[pol.1x.ind,pol.1y.ind],(outcomes.upper[,2,]/1000*adj)[pol.2x.ind,pol.2y.ind],(outcomes.upper[,2,]/1000*adj)[pol.3x.ind,pol.3y.ind])
+har.low <- c((outcomes.lower[,2,]/1000*adj)[pol.1x.ind,pol.1y.ind],(outcomes.lower[,2,]/1000*adj)[pol.2x.ind,pol.2y.ind],(outcomes.lower[,2,]/1000*adj)[pol.3x.ind,pol.3y.ind])
+
+B<-barplot(har,yaxt="n",ylim=c(0,160),col="light grey")
+ablineclip(v=0.7,y1=har.low[1], y2=har.up[1],lwd=2,col="grey")
+ablineclip(v=1.9,y1=har.low[2], y2=har.up[2],lwd=2,col="grey")
+ablineclip(v=3.1,y1=har.low[3], y2=har.up[3],lwd=2,col="grey")
+mtext("1     2     3",1,line=0.25)
+text(0.5,150,"(a)")
+
+axis(2,las=2)
+mtext("Harvest (000s)",2,line=3)
+
+cv.har <- c((outcomes.med[,8,]) [pol.1x.ind,pol.1y.ind],(outcomes.med[,8,]) [pol.2x.ind,pol.2y.ind],(outcomes.med[,8,]) [pol.3x.ind,pol.3y.ind])
+cv.har.up <- c((outcomes.upper[,8,]) [pol.1x.ind,pol.1y.ind],(outcomes.upper[,8,]) [pol.2x.ind,pol.2y.ind],(outcomes.upper[,8,]) [pol.3x.ind,pol.3y.ind])
+cv.har.low <- c((outcomes.lower[,8,]) [pol.1x.ind,pol.1y.ind],(outcomes.lower[,8,]) [pol.2x.ind,pol.2y.ind],(outcomes.lower[,8,]) [pol.3x.ind,pol.3y.ind])
+
+barplot(1/cv.har,yaxt="n",ylim=c(0,1),col="light grey")
+axis(2,las=2)
+ablineclip(v=0.7,y1= 1/cv.har.low[1], y2= 1/cv.har.up[1],lwd=2,col="grey")
+ablineclip(v=1.9,y1= 1/cv.har.low[2], y2= 1/cv.har.up[2],lwd=2,col="grey")
+ablineclip(v=3.1,y1= 1/cv.har.low[3], y2= 1/cv.har.up[3],lwd=2,col="grey")
+mtext("Harvest stability (1/CV)",2,line=3)
+text(0.5,0.95,"(b)")
+
+mtext("1     2     3",1,line=0.25)
+
+over <- c((outcomes.med[,9,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.med[,9,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.med[,9,]*100) [pol.3x.ind,pol.3y.ind])
+over.up <- c((outcomes.upper[,9,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.upper[,9,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.upper[,9,]*100) [pol.3x.ind,pol.3y.ind])
+over.low <- c((outcomes.lower[,9,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.lower[,9,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.lower[,9,]*100) [pol.3x.ind,pol.3y.ind])
+
+barplot(over,yaxt="n",ylim=c(0,100),col="light grey")
+axis(2,las=2)
+ablineclip(v=0.7,y1= over.low[1], y2= over.up[1],lwd=2,col="grey")
+ablineclip(v=1.9,y1= over.low[2], y2= over.up[2],lwd=2,col="grey")
+ablineclip(v=3.1,y1= over.low[3], y2= over.up[3],lwd=2,col="grey")
+mtext("Chance trib. goals met (%)",2,line=3)
+text(0.5,96,"(c)")
+
+mtext("1     2     3",1,line=0.25)
+
+ext <- c((outcomes.med[,6,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.med[,6,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.med[,6,]*100) [pol.3x.ind,pol.3y.ind])
+ext.up <- c((outcomes.upper[,6,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.upper[,6,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.upper[,6,]*100) [pol.3x.ind,pol.3y.ind])
+ext.low <- c((outcomes.lower[,6,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.lower[,6,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.lower[,6,]*100) [pol.3x.ind,pol.3y.ind])
+
+barplot(ext,yaxt="n",ylim=c(0,40),col="light grey")
+axis(2,las=2)
+ablineclip(v=0.7,y1= 3, y2= ext.up[1],lwd=2,col="grey")
+ablineclip(v=1.9,y1= ext.low[2], y2= 40,lwd=2,col="grey")
+ablineclip(v=3.1,y1= ext.low[3], y2= ext.up[3],lwd=2,col="grey")
+mtext("Populations extirpated (%)",2,line=3)
+text(0.5,38,"(d)")
+
+mtext("1     2     3",1,line=0.25)
+
+mtext("Policy",1,outer=T,adj=0.48,line=0.8,cex=1.1)
+```
+Figure 2.**Tradeoffs between harvest policies**. Predicted ability of three alterative harvest policies (see Figure 1) to meet fishery (A: harvest and B: harvest stability), equity (B: proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner goals) and conservation (C: proportion of sub-stocks extirpated) objectives. Each bar is the median (and 25th and 75th percentiles) performance of a given policy as calculated over the last 20 years of each Monte Carlo trial (500 in total). Contrasting policies within and among panels illustrates key tradeoffs in the system between harvest, equity and conservation, as well as asymmetry in them: for example, a 25% reduction in harvest (from Policy 1 to 3).
+
+```{r  fig3, echo=FALSE,fig.height = 5, fig.width = 6.5, fig.align = "center"}
+outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.May312019")
+rk.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
+rk.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
+rk.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.20),na.rm=T)
+
+outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_true.May312019")
+tv.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
+tv.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
+tv.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.2),na.rm=T)
+
+outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.BH.May312019")
+#outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_200.BH_CV0.2.May292019")
+bh.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
+bh.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
+bh.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.2),na.rm=T)
+
+# colors
+blue_bar <- adjustcolor( "blue", alpha.f = 0.7)
+green_bar <- adjustcolor( "dark green", alpha.f = 0.7)
+
+### Harvest
+har <- c((rk.outcomes.med[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+    	(rk.outcomes.med[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(tv.outcomes.med[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(tv.outcomes.med[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(bh.outcomes.med[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(bh.outcomes.med[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj
+			)
+			dim(har) <- c(2,3)
+
+har.up <- c((rk.outcomes.upper[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(rk.outcomes.upper[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(tv.outcomes.upper[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(tv.outcomes.upper[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(bh.outcomes.upper[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(bh.outcomes.upper[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj
+			)
+			dim(har.up) <- c(2,3)
+			
+har.low <- c((rk.outcomes.lower[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(rk.outcomes.lower[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(tv.outcomes.lower[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(tv.outcomes.lower[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj,
+			(bh.outcomes.lower[,2,]/1000 ) [pol.1x.ind,pol.1y.ind]*adj,
+			(bh.outcomes.lower[,2,]/1000 ) [pol.3x.ind,pol.3y.ind]*adj
+			)
+			dim(har.low) <- c(2,3)
+###
+cv <- c((rk.outcomes.med[,8,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.med[,8,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.med[,8,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.med[,8,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.med[,8,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.med[,8,]) [pol.3x.ind,pol.3y.ind]
+			)
+			dim(cv) <- c(2,3)
+			
+cv.up <- c((rk.outcomes.upper[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.upper[, 8,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.upper[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.upper[, 8,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.upper[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.upper[, 8,]) [pol.3x.ind,pol.3y.ind]
+			)
+			dim(cv.up) <- c(2,3)
+			
+cv.low <- c((rk.outcomes.lower[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.lower[, 8,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.lower[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.lower[, 8,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.lower[, 8,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.lower[, 8,]) [pol.3x.ind,pol.3y.ind]
+			)
+			dim(cv.low) <- c(2,3)
+			
+###Tributary goals
+trib <- c((rk.outcomes.med[,9,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.med[,9,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.med[,9,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.med[,9,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.med[,9,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.med[,9,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(trib) <- c(2,3)
+			
+trib.up <- c((rk.outcomes.upper[,9,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.upper[,9,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.upper[,9,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.upper[,9,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.upper[,9,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.upper[,9,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(trib.up) <- c(2,3)
+			
+trib.low <- c((rk.outcomes.lower[,9,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.lower[,9,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.lower[,9,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.lower[,9,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.lower[,9,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.lower[,9,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(trib.low) <- c(2,3)
+			
+###Extinction risk
+ext <- c((rk.outcomes.med[,6,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.med[,6,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.med[,6,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.med[,6,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.med[,6,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.med[,6,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(ext) <- c(2,3)
+			
+ext.up <- c((rk.outcomes.upper[,6,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.upper[,6,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.upper[,6,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.upper[,6,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.upper[,6,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.upper[,6,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(ext.up) <- c(2,3)
+			
+ext.low <- c((rk.outcomes.lower[,6,]) [pol.1x.ind,pol.1y.ind],
+			(rk.outcomes.lower[,6,]) [pol.3x.ind,pol.3y.ind],
+			(tv.outcomes.lower[,6,]) [pol.1x.ind,pol.1y.ind],
+			(tv.outcomes.lower[,6,]) [pol.3x.ind,pol.3y.ind],
+			(bh.outcomes.lower[,6,]) [pol.1x.ind,pol.1y.ind],
+			(bh.outcomes.lower[,6,]) [pol.3x.ind,pol.3y.ind]
+			)*100
+			dim(ext.low) <- c(2,3)	
+
+par(mfrow=c(2,2),bty="o", mar=c(1,2,2,4),oma=c(2,2.5,0,0))#set dimensions to plots
+
+B<-barplot(har,yaxt="n",ylim=c(0,160),col=c("light grey","light grey",blue_bar, blue_bar, green_bar, green_bar),beside=T,space=c(0.1,1))
+
+ablineclip(v=1.5,y1=har.low[1,1], y2=har.up[1,1],lwd=2,col="grey")
+ablineclip(v=2.6,y1=har.low[2,1], y2=har.up[2,1],lwd=2,col="grey")
+
+ablineclip(v=4.6,y1=har.low[1,2], y2=har.up[1,2],lwd=2,col="blue")
+ablineclip(v=5.7,y1=har.low[2,2], y2=har.up[2,2],lwd=2,col="blue")
+
+ablineclip(v=7.7,y1=har.low[1,3], y2=har.up[1,1],lwd=2,col="dark green")
+ablineclip(v=8.8,y1=har.low[2,3], y2=har.up[2,3],lwd=2,col="dark green")
+text(1.2,150,"(a)")
+
+mtext("  1   3         1   3        1   3  ",1,line=0.25)
+axis(2,las=2)
+mtext("Harvest (000s)",2,line=3)
+
+B<-barplot(1/cv,yaxt="n",ylim=c(0,1.1),col=c("light grey","light grey",blue_bar, blue_bar, green_bar, green_bar),beside=T,space=c(0.1,1))
+
+ablineclip(v=1.5,y1=1/cv.low[1,1], y2=1/cv.up[1,1],lwd=2,col="grey")
+ablineclip(v=2.6,y1=1/cv.low[2,1], y2=1/cv.up[2,1],lwd=2,col="grey")
+
+ablineclip(v=4.6,y1=1/cv.low[1,2], y2=1/cv.up[1,2],lwd=2,col="blue")
+ablineclip(v=5.7,y1=1/cv.low[2,2], y2=1/cv.up[2,2],lwd=2,col="blue")
+
+ablineclip(v=7.7,y1=1/cv.low[1,3], y2=1/cv.up[1,3],lwd=2,col="dark green")
+ablineclip(v=8.8,y1=1/cv.low[2,3], y2=1/cv.up[2,3],lwd=2,col="dark green")
+text(1.2,1.05,"(b)")
+mtext("  1   3         1   3        1   3  ",1,line=0.25)
+
+axis(2,las=2)
+
+mtext("Harvest stability (1/CV)",2,line=3)
+legend(1.4,1.05,legend=c("Stationary Ricker", "Time varying Ricker", "Time varying Beverton-Holt"),bty="n",fill=c("light grey",blue_bar, green_bar),cex=0.95)
+#text(1.25,1.06,"Stock-recruit dynamics",pos=4,cex=0.95)
+
+
+barplot(trib,yaxt="n",ylim=c(0,100),col=c("light grey","light grey",blue_bar, blue_bar, green_bar, green_bar),beside=T,space=c(0.1,1))
+axis(2,las=2)
+
+ablineclip(v=1.5,y1= trib.low[1,1], y2= trib.up[1,1],lwd=2,col="grey")
+ablineclip(v=2.6,y1= trib.low[2,1], y2= trib.up[2,1],lwd=2,col="grey")
+
+ablineclip(v=4.6,y1= trib.low[1,2], y2=trib.up[1,2],lwd=2,col="blue")
+ablineclip(v=5.7,y1= trib.low[2,2], y2=trib.up[2,2],lwd=2,col="blue")
+
+ablineclip(v=7.7,y1= trib.low[1,3], y2= trib.up[1,3],lwd=2,col="dark green")
+ablineclip(v=8.8,y1= trib.low[2,3], y2= trib.up[2,3],lwd=2,col="dark green")
+text(1.2,96,"(c)")
+
+axis(2,las=2)
+mtext("Chance trib. goals met (%)",2,line=3)
+mtext("  1   3         1   3        1   3  ",1,line=0.25)
+
+barplot(ext,yaxt="n",ylim=c(0,30),col=c("light grey","light grey",blue_bar, blue_bar, green_bar, green_bar),beside=T,space=c(0.1,1))
+axis(2,las=2)
+
+ablineclip(v=1.5,y1= ext.low[1,1], y2= ext.up[1,1],lwd=2,col="grey")
+ablineclip(v=2.6,y1= ext.low[2,1], y2= ext.up[2,1],lwd=2,col="grey")
+
+ablineclip(v=4.6,y1= ext.low[1,2], y2=ext.up[1,2],lwd=2,col="blue")
+ablineclip(v=5.7,y1= ext.low[2,2], y2=ext.up[2,2],lwd=2,col="blue")
+
+ablineclip(v=7.7,y1= ext.low[1,3], y2= ext.up[1,3],lwd=2,col="dark green")
+ablineclip(v=8.8,y1= ext.low[2,3], y2= ext.up[2,3],lwd=2,col="dark green")
+text(1.2,28,"(d)")
+
+mtext("Populations extirpated (%)",2,line=3)
+mtext("  1   3         1   3        1   3  ",1,line=0.25)
+mtext("Harvest policy",1,line=1,outer=T)
+
+
+```
+Figure 3. **Tradeoffs between harvest policies across alternative states of nature**.  Performance of alternative harvest policies (1 and 3 from Figure 1) across three alternative forms of underlying stock recruitment dynamics (grey bars: stationary Ricker type stock-recruitment relationship; blue bars: time varying Ricker stock-recruitment relationship; green bars: time varying Beverton-Holt stock-recruitment relationship).  These plots illustrate that while the general tradeoffs are robust to structural uncertainty in the underlying form of the stock-recruitment dynamics, the magnitude and asymmetry of the tradeoffs are sensitive to the underlying drivers of variation in recruitment.   
+
+```{r  fig4, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
+
+# load time series simulation output (year 8 is first fully simulated year)
+base_timeseries <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.time_series.May312019")
+
+# load most recent four years of spawner abundance (estimates states), wrangle median and 20/80th percentiles into object for plotting
+states <- readRDS("outputs/states.May312019")
+stock_names <- c("Aniak", "George","Holitna", "Holokuk", "Kisaralik", "Kogrukluk", "Kwethluk", "Oskawalik", "Pitka", "Swift", "Takotna", "Tatlawiksuk", "Tuluksak")
+spawners.med <- apply(states,c(1,2),quantile,probs=c(0.5),na.rm=T)
+spawners.lower <- apply(states,c(1,2),quantile,probs=c(0.2),na.rm=T)
+spawners.upper <- apply(states,c(1,2),quantile,probs=c(0.8),na.rm=T)
+colnames(spawners.med) <- stock_names
+rownames(spawners.med) <- seq(2014,2017)
+colnames(spawners.lower) <- stock_names
+rownames(spawners.lower) <- seq(2014,2017)
+colnames(spawners.upper) <- stock_names
+rownames(spawners.upper) <- seq(2014,2017)
+
+years <- rep(seq(2014,2017),39)
+spawn_reform <- cbind(gather(as.data.frame(spawners.med),Stock,med.s),gather(as.data.frame(spawners.lower),Stock,low.s),gather(as.data.frame(spawners.upper),Stock,up.s),years)
+spawn_reform <- spawn_reform[,-3]
+spawn_reform <- spawn_reform[,-4]
+
+# select policy (dimensions to array are: time step, sub-stock, escapement goal, harvest goal, MC trial),
+
+eg <- pol.1x.ind
+hg <- pol.1y.ind
+
+# wrangle median and 20/80th percentiles of projections into object for plotting
+
+pol.timeseries.med <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.5),na.rm=T)[8:50,]
+colnames(pol.timeseries.med) <- stock_names
+rownames(pol.timeseries.med) <- seq(2018,2060)
+
+pol.timeseries.lower <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.2),na.rm=T)[8:50,]
+colnames(pol.timeseries.lower) <- stock_names
+rownames(pol.timeseries.lower) <- seq(2018,2060)
+
+pol.timeseries.upper <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.8),na.rm=T)[8:50,]
+colnames(pol.timeseries.upper) <- stock_names
+rownames(pol.timeseries.upper) <- seq(2018,2060)
+
+years <- rep(seq(2018,2060),39)
+
+outcomes_reform <- cbind(gather(as.data.frame(pol.timeseries.med),Stock,med.s),gather(as.data.frame(pol.timeseries.lower),Stock,low.s),gather(as.data.frame(pol.timeseries.upper),Stock,up.s),years)
+outcomes_reform <- outcomes_reform[,-3]
+outcomes_reform <- outcomes_reform[,-4]
+
+# combine states and projections
+projections <- rbind(spawn_reform,outcomes_reform)
+
+# generate plot
+ggplot(data=projections, aes(x=years, y=med.s/1000, group=Stock))+
+  facet_wrap(~Stock, nrow=3, scales="free")+
+  geom_ribbon(aes(ymin=low.s/1000, ymax=up.s/1000),linetype=2, fill="dodgerblue",alpha=0.5)+
+  geom_line()+
+  xlab("Year")+
+  ylab("Spawners")+
+  scale_x_continuous(breaks=c(2018,2040,2060))+
+  theme_bw()
+
+
+```
+Figure 4. **Projections of spawner abundance**.  Projected median (thick line) and 50% spawner abundance under harvest policy 1.   
+```{r  fig5, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
+# select policy (dimensions to array are: time step, sub-stock, escapement goal, harvest goal, MC trial),
+
+eg <- pol.2x.ind
+hg <- pol.2y.ind
+
+# wrangle median and 20/80th percentiles of projections into object for plotting
+
+pol.timeseries.med <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.5),na.rm=T)[8:50,]
+colnames(pol.timeseries.med) <- stock_names
+rownames(pol.timeseries.med) <- seq(2018,2060)
+
+pol.timeseries.lower <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.2),na.rm=T)[8:50,]
+colnames(pol.timeseries.lower) <- stock_names
+rownames(pol.timeseries.lower) <- seq(2018,2060)
+
+pol.timeseries.upper <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.8),na.rm=T)[8:50,]
+colnames(pol.timeseries.upper) <- stock_names
+rownames(pol.timeseries.upper) <- seq(2018,2060)
+
+years <- rep(seq(2018,2060),39)
+
+outcomes_reform <- cbind(gather(as.data.frame(pol.timeseries.med),Stock,med.s),gather(as.data.frame(pol.timeseries.lower),Stock,low.s),gather(as.data.frame(pol.timeseries.upper),Stock,up.s),years)
+outcomes_reform <- outcomes_reform[,-3]
+outcomes_reform <- outcomes_reform[,-4]
+
+# combine states and projections
+projections <- rbind(spawn_reform,outcomes_reform)
+
+# generate plot
+ggplot(data=projections, aes(x=years, y=med.s/1000, group=Stock))+
+  facet_wrap(~Stock, nrow=3, scales="free")+
+  geom_ribbon(aes(ymin=low.s/1000, ymax=up.s/1000),linetype=2, fill="dodgerblue",alpha=0.5)+
+  geom_line()+
+  xlab("Year")+
+  ylab("Spawners")+
+  scale_x_continuous(breaks=c(2018,2040,2060))+
+  theme_bw()
+
+
+```
+Figure 5. **Projections of spawner abundance**.  Projected median (thick line) and 50% spawner abundance under harvest policy 2.
+
+```{r  fig6, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
+# select policy (dimensions to array are: time step, sub-stock, escapement goal, harvest goal, MC trial),
+
+eg <- pol.3x.ind
+hg <- pol.3y.ind
+
+# wrangle median and 20/80th percentiles of projections into object for plotting
+
+pol.timeseries.med <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.5),na.rm=T)[8:50,]
+colnames(pol.timeseries.med) <- stock_names
+rownames(pol.timeseries.med) <- seq(2018,2060)
+
+pol.timeseries.lower <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.2),na.rm=T)[8:50,]
+colnames(pol.timeseries.lower) <- stock_names
+rownames(pol.timeseries.lower) <- seq(2018,2060)
+
+pol.timeseries.upper <- apply(base_timeseries[,,eg,hg,],c(1,2),quantile,probs=c(0.8),na.rm=T)[8:50,]
+colnames(pol.timeseries.upper) <- stock_names
+rownames(pol.timeseries.upper) <- seq(2018,2060)
+
+years <- rep(seq(2018,2060),39)
+
+outcomes_reform <- cbind(gather(as.data.frame(pol.timeseries.med),Stock,med.s),gather(as.data.frame(pol.timeseries.lower),Stock,low.s),gather(as.data.frame(pol.timeseries.upper),Stock,up.s),years)
+outcomes_reform <- outcomes_reform[,-3]
+outcomes_reform <- outcomes_reform[,-4]
+
+# combine states and projections
+projections <- rbind(spawn_reform,outcomes_reform)
+
+# generate plot
+ggplot(data=projections, aes(x=years, y=med.s/1000, group=Stock))+
+  facet_wrap(~Stock, nrow=3, scales="free")+
+  geom_ribbon(aes(ymin=low.s/1000, ymax=up.s/1000),linetype=2, fill="dodgerblue",alpha=0.5)+
+  geom_line()+
+  xlab("Year")+
+  ylab("Spawners")+
+  scale_x_continuous(breaks=c(2018,2040,2060))+
+  theme_bw()
+
+
+```
+Figure 6. **Projections of spawner abundance**.  Projected median (thick line) and 50% spawner abundance under harvest policy 3.
