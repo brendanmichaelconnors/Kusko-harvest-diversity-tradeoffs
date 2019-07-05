@@ -27,10 +27,7 @@ pol.3x<-135; pol.3x.ind <- which(abs((egfloor/1000)-pol.3x)==min(abs((egfloor/10
 pol.3y<-170; pol.3y.ind <- which(abs((harvest_goal/1000)-pol.3y)==min(abs((harvest_goal/1000)-pol.3y)))
 
 # load simulation output
-
-#outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.May312019")
-#outcomes <- readRDS("outputs/alt_vul_sims.ny_50.SR_rick.sim_500.TV_false.July32019")
-outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_true.May312019")
+outcomes <- readRDS("outputs/base_sims.ricker")
 
 outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
 outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.75),na.rm=T)
@@ -45,7 +42,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r  fig1, echo=FALSE,fig.height = 5.5, fig.width = 6.5, fig.align = "center"}
-par(mfrow=c(2,2),bty="o", mar=c(2,2,2,5),oma=c(2,2,1,1))#set dimensions to plots
+par(mfrow=c(2,2),bty="o", mar=c(2,2,2,5),oma=c(2,2,1,1))
 
 #panel a - harvest
 xx<-as.table((outcomes.med[,2,]/1000)*adj)
@@ -180,7 +177,7 @@ mtext("Harvest goal (000s)",side=2,outer=T,cex=1.1,line=0.75)
 Figure 1. **Predicted consequences of alternative harvest policies**. Each policy is defined by a combination of basin scale harvest (y-axis) and escapement goals (x-axis). Performance measures (z-axis) are calculated over the last 20 years of each Monte Carlo trial (500 in total), which project stock dynamics 50 years forward in time, and correspond to (A) median harvest (in thousands of Chinook salmon), (B) harvest stability (1/ coefficient of variation [CV] in harvest), (C) proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner target (S~MSY~) and (D) proportion of sub-stocks extirpated. Three illustrative harvest policies are overlaid on each panel: (1) a policy that seeks to maximize yield, (2) a fixed harvest policy corresponding to minimum subsistence needs and (3) a policy that seeks to reduce biological risks to sub-stocks while also achieving relatively high harvests. 
 
 ```{r  fig2, echo=FALSE,fig.height = 5, fig.width = 4.5, fig.align = "center"}
-par(mfrow=c(2,2),bty="o", mar=c(1,2,2,4),oma=c(2,2.5,1,0))#set dimensions to plots
+par(mfrow=c(2,2),bty="o", mar=c(1,2,2,4),oma=c(2,2.5,1,0))
 
 har <- c(((outcomes.med[,2,]/1000)*adj)[pol.1x.ind,pol.1y.ind],(outcomes.med[,2,]/1000*adj)[pol.2x.ind,pol.2y.ind],(outcomes.med[,2,]/1000*adj)[pol.3x.ind,pol.3y.ind])
 har.up <- c((outcomes.upper[,2,]/1000*adj)[pol.1x.ind,pol.1y.ind],(outcomes.upper[,2,]/1000*adj)[pol.2x.ind,pol.2y.ind],(outcomes.upper[,2,]/1000*adj)[pol.3x.ind,pol.3y.ind])
@@ -243,18 +240,17 @@ mtext("Policy",1,outer=T,adj=0.48,line=0.8,cex=1.1)
 Figure 2.**Tradeoffs between harvest policies**. Predicted ability of three alterative harvest policies (see Figure 1) to meet fishery (A: harvest and B: harvest stability), equity (B: proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner goals) and conservation (C: proportion of sub-stocks extirpated) objectives. Each bar is the median (and 25th and 75th percentiles) performance of a given policy as calculated over the last 20 years of each Monte Carlo trial (500 in total). Contrasting policies within and among panels illustrates key tradeoffs in the system between harvest, equity and conservation, as well as asymmetry in them: for example, a 25% reduction in harvest (from Policy 1 to 3).
 
 ```{r  fig3, echo=FALSE,fig.height = 5, fig.width = 6.5, fig.align = "center"}
-outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.May312019")
+outcomes <- readRDS("outputs/base_sims.ricker")
 rk.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
 rk.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
 rk.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.20),na.rm=T)
 
-outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_true.May312019")
+outcomes <- readRDS("outputs/base_sims.rickerTV")
 tv.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
 tv.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
 tv.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.2),na.rm=T)
 
-outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.BH.May312019")
-#outcomes <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_200.BH_CV0.2.May292019")
+outcomes <- readRDS("outputs/base_sims.bhTV")
 bh.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
 bh.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
 bh.outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.2),na.rm=T)
@@ -453,7 +449,7 @@ Figure 3. **Tradeoffs between harvest policies across alternative states of natu
 ```{r  fig4, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
 
 # load time series simulation output (year 8 is first fully simulated year)
-base_timeseries <- readRDS("outputs/base_sims.ny_50.SR_rick.sim_500.TV_false.time_series.May312019")
+base_timeseries <- readRDS("outputs/base_sims_projections.ricker")
 
 # load most recent four years of spawner abundance (estimates states), wrangle median and 20/80th percentiles into object for plotting
 states <- readRDS("outputs/states.May312019")
