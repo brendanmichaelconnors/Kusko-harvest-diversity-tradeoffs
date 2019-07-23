@@ -71,8 +71,9 @@ SC.eq <- function(U,a,b){
 # period <- period of enviro forcing cycle if SR_rel = "Beverton-Holt"
 # dir.SR <- flag for directional change in SR parameters ("Y" or "N")
 # SR.devs <- deviations in SR parameters by time step if dir.SR == "Y"
+# expan <- expantion of system to account for unmodelled spawning populations
 
-process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR.devs){
+process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR.devs,expan){
 	ns = length(Ro) #number of sub-stocks
 	for.error = for.error
 	OU = OU
@@ -88,9 +89,7 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 		}
 	}
 	
-	#Create correlation among stocks in recruitment residuals
-	#R <- matrix(0,ns,ns) 
-	#for(i in 1:ns)R[i,i] <- 1
+	#Create recruitment deviations that are correlated among stocks 
 	epi = rmvnorm(ny, sigma= vcov.matrix)
 
 	#Build time series of Spawners (S), abundance of returning spawners pre-harvest
@@ -199,8 +198,8 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 		trib.gl[j] <- ifelse(median(S[(ny-pm.yr):ny,j]) >= (Smsy[j]),1,0)
 		}
 
-	pms[,1] <- sum(S[pm.yr:ny,])/(ny - pm.yr +1)
-	pms[,2] <- sum(H[pm.yr:ny,])/(ny - pm.yr +1)
+	pms[,1] <- (sum(S[pm.yr:ny,])/(ny - pm.yr +1)) * expan
+	pms[,2] <- (sum(H[pm.yr:ny,])/(ny - pm.yr +1)) * expan
 	pms[,3] <- median(harvest_rate)
 	pms[,4] <- sum(over)/length(alpha)
 	pms[,5] <- sum(ext)/length(alpha)

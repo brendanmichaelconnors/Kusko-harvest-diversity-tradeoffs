@@ -1,0 +1,387 @@
+1/rnorm(0.56,0.05)
+1/(rnorm(0.56,0.05))
+expan <- 1/(rnorm(1,0.56,0.05))
+expan
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+1/(rnorm(1,0.56,0.05))
+#------------------------------------------------------------------------------##
+# Load functions and libraries for analysis#
+#------------------------------------------------------------------------------##
+#
+source("functions.R") #
+#
+library(MASS)#
+library(mvtnorm)#
+library(plotrix)#
+library(matrixStats)#
+library(mgcv)#
+library(plyr)#
+library(fields)#
+library(gdata)#
+library(graphics)#
+library(fields)#
+library(dichromat)#
+library(grDevices)#
+library(viridis)#
+library(shape)#
+library(autoimage)#
+library(tidyverse)#
+library(plyr)#
+#
+#------------------------------------------------------------------------------##
+# Load posterior samples#
+#------------------------------------------------------------------------------##
+#
+#samps = read.csv("inputs/Posterior_Samples_alt_vuln_S_trunc.csv")#
+#samps = read.csv("inputs/Posterior_Samples_alt_ess_S_trunc.csv")#
+samps = read.csv("inputs/Posterior_Samples_base_S_trunc.csv")#
+samps = as.matrix(samps)
+##------------------------------------------------------------------------------##
+# Load functions and libraries for analysis#
+#------------------------------------------------------------------------------##
+#
+source("functions.R") #
+#
+library(MASS)#
+library(mvtnorm)#
+library(plotrix)#
+library(matrixStats)#
+library(mgcv)#
+library(plyr)#
+library(fields)#
+library(gdata)#
+library(graphics)#
+library(fields)#
+library(dichromat)#
+library(grDevices)#
+library(viridis)#
+library(shape)#
+library(autoimage)#
+library(tidyverse)#
+library(plyr)#
+#
+#------------------------------------------------------------------------------##
+# Load posterior samples#
+#------------------------------------------------------------------------------##
+#
+#samps = read.csv("inputs/Posterior_Samples_alt_vuln_S_trunc.csv")#
+#samps = read.csv("inputs/Posterior_Samples_alt_ess_S_trunc.csv")#
+samps = read.csv("inputs/Posterior_Samples_base_S_trunc.csv")#
+samps = as.matrix(samps)
+# --- Set common conditions for simulations  --------------------------------------------#
+num.sims = 500 # number of Monte Carlo trials#
+ny = 50 # number of years in forward simulation#
+pm.yr <- ny-20#
+for.error <- 0.27 #
+OU <- 0.1 #
+#
+# --- Create array to store outcomes ----------------------------------------------------#
+harvest_goal <- seq(1000,100000,length.out=40)#
+egfloor <- seq(1,100000,length.out=40)#
+sim.outcomes <- array(NA,dim=c(length(egfloor),9, length(harvest_goal),num.sims))#
+sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goal),num.sims))
+i = 1
+j = 1
+w=1
+SR_rel <-  "Ricker" #
+	dir.SR <- "F"#
+	SR_devs <- array(1,dim=c(ny,2,13))
+draw <- sample(10000,1)#
+			alpha <- process.iteration(samps[draw,])$alpha#
+			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}#
+			beta <- process.iteration(samps[draw,])$beta#
+			Ro <- log(alpha)/beta#
+			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R#
+			mat <- process.iteration(samps[draw,])$pis#
+			Rec <- process.iteration(samps[draw,])$R#
+			Spw <- process.iteration(samps[draw,])$S#
+			lst.resid <- process.iteration(samps[draw,])$last_resid#
+			phi <- process.iteration(samps[draw,])$phi#
+			sub <- ifelse(harvest_goal[w]<90000,harvest_goal[w],90000)#
+			com <- ifelse(harvest_goal[w]<90000,0,harvest_goal[w]-90000)#
+			expan <- 1/(rnorm(1,0.56,0.05))
+out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
+k=1
+out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
+out
+process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR.devs,expan){#
+	ns = length(Ro) #number of sub-stocks#
+	for.error = for.error#
+	OU = OU#
+	m.alpha <- alpha#
+	m.beta <- beta#
+#
+	# create vectors of time varying alpha#
+	if (SR_rel == "Beverton-Holt"){ #
+		beta.tim <- (alpha/beta)*exp(-1)#
+		alpha.time <- matrix(NA,ny,length(alpha))#
+		for (t in 1:ny){#
+			alpha.time[t,] <- sin(2*pi*(t/period))*((alpha + (alpha * BH.alpha.CV)) - alpha) + alpha#
+		}#
+	}#
+	#Create recruitment deviations that are correlated among stocks #
+	epi = rmvnorm(ny, sigma= vcov.matrix)#
+#
+	#Build time series of Spawners (S), abundance of returning spawners pre-harvest#
+	# (N), and the component of the residual that is correlated throught time (v)#
+	R = t(matrix(0,ns,ny))#
+	S = R * (1-0)#
+	v = R; v[,]=0#
+	R[1:3,]=Rec#
+	N = array(0,dim=c(ny,4,ns))#
+	Ntot = R; Ntot[,]=0#
+	H = Ntot; S = Ntot#
+	S[4:7,] = Spw#
+	predR = Ntot#
+	# populate first few years with realized states#
+	R[4,] = exp(log(alpha[]*S[4,]*exp(-beta[]*S[4,])) + phi* lst.resid) * exp(epi[4,])#
+	v[4,] = log(R[4,])-log(alpha[]*S[4,]*exp(-beta[]*S[4,]))#
+	for(i in 5:7){#
+		R[i,] = exp(log(alpha[]*S[i,]*exp(-beta[]*S[i,])) + phi* v[i-1,]) * exp(epi[i,])#
+		v[i,] = log(R[i,])-log(alpha[]*S[i,]*exp(-beta[]*S[i,]))		#
+	}#
+#
+	N[4:7,1,]=R[4:7-(3),] * mat[1]#
+	N[5:7,2,]=R[5:7-(4),] * mat[2]#
+	N[6:7,3,]=R[6:7-(5),] * mat[3]#
+	N[7,4,]=R[7-(6),] * mat[4]#
+	# Loop through years of simulation	  #
+	for(i in (7+1):ny){ #
+		N[i,1,] = R[i-(4),] * mat[1]#
+		N[i,2,] = R[i-(5),] * mat[2]#
+		N[i,3,] = R[i-(6),] * mat[3]#
+		N[i,4,] = R[i-(7),] * mat[4]#
+		Ntot[i,] = colSums(N[i,,])#
+#
+		# apply harvest control rule#
+		run.size <- sum(Ntot[i,])#
+		if(is.na(run.size)==TRUE){run.size <- 0}#
+		if(run.size > 999000) {run.size <- 1000000}#
+		HR.all = sub_hcr(sub,com,egfloor, run.size,for.error)#
+		HR_adj = 1#
+		realized.HR <- (HR.all*HR_adj); realized.HR[realized.HR < 0] <- 0; realized.HR[realized.HR > 1] <-1#
+		outcome_error <- (1+rnorm(1,0,OU))#
+		H[i,] =  realized.HR*Ntot[i,]*ifelse(outcome_error<0, 0, outcome_error) #
+		S_exp = Ntot[i,]-H[i,]#
+		S_exp[S_exp<0] = 0#
+		S_exp[S_exp<50] = 0#
+		S[i,] = S_exp#
+		if (dir.SR == "T") {#
+			alpha <- m.alpha* SR_devs[i,1,]#
+			beta <- m.beta* SR_devs[i,2,]#
+				}#
+#
+		# predict recruitment#
+		if (SR_rel == "Ricker"){#
+			R[i,] = alpha[]*S[i,]*exp(-beta[]*S[i,]+phi*v[i-1,]+epi[i,])#
+			predR[i,] = alpha[]*S[i,]*exp(-beta[]*S[i,])#
+			v[i,] = log(R[i,])-log(predR[i,])#
+			v[v[,]=='NaN'] <- 0#
+		    }#
+		if (SR_rel == "Beverton-Holt"){#
+			R[i,] = alpha.time[i,]*S[i,]/(1+(alpha.time[i,]/beta.tim[])*S[i,])*exp(phi*v[i-1,]+epi[i,])#
+			predR[i,] = alpha.time[i,]*S[i,]/(1+(alpha.time[i,]/beta.tim[])*S[i,])#
+			v[i,] = log(R[i,])-log(predR[i,])#
+			v[v[,]=='NaN'] <- 0#
+		    }#
+	    }#
+	# Output#
+	# Performance measures:#
+	#	1: escapement#
+	#	2: harvest#
+	#	3: harvest rate#
+	#	4: predicted overfished#
+	#	5: predicted trending towards extinction#
+	#	6: empirical extinction#
+	#	7: proportion of years failed to meet subsistence goal#
+	#	8: CV in harvest#
+	#	9: proportion of tributary goals met#
+	pms <- matrix(NA,1,9) #
+#
+	S[S[,]=='NaN'] <- 0#
+	Ntot[Ntot[,]=='NaN'] <- 0#
+	over <- matrix(NA,length(alpha))#
+	ext <- matrix(NA,length(alpha))#
+	ext.emp <-ext#
+	trib.gl <-ext#
+	harvest_rate <- (H[pm.yr:ny,]/Ntot[pm.yr:ny,])[,1]#
+	harvest_rate[harvest_rate>1] <- 1#
+	harvest_rates <- (H[pm.yr:ny,]/Ntot[pm.yr:ny,])#
+	harvest_rates[harvest_rates>1] <- 1#
+	harvest_rate[harvest_rate=='NaN']<-1#
+	harvest_rates[harvest_rates=='NaN']<-1#
+	Smax <- round((m.alpha/m.beta)/m.alpha,digits=0)  #
+	ln.alpha <- log(m.alpha)#
+	Smsy <- round((ln.alpha*(0.5-0.07* ln.alpha))/m.beta)#
+	for(j in 1:length(alpha)){#
+		over[j] <- SC.eq(median(harvest_rates[,j]),alpha[j],beta[j])[3]#
+		ext[j] <- SC.eq(median(harvest_rates[,j]),alpha[j],beta[j])[4]#
+		ext.emp[j] <- ifelse(median(S[(ny-pm.yr):ny,j]) < ((log(alpha)/beta)*0.05)[j],1,0) # less than 5% of unfished biomass/abundance#
+		trib.gl[j] <- ifelse(median(S[(ny-pm.yr):ny,j]) >= (Smsy[j]),1,0)#
+		}#
+#
+	pms[,1] <- (sum(S[pm.yr:ny,])/(ny - pm.yr +1)) * expan#
+	pms[,2] <- (sum(H[pm.yr:ny,])/(ny - pm.yr +1)) * expan#
+	pms[,3] <- median(harvest_rate)#
+	pms[,4] <- sum(over)/length(alpha)#
+	pms[,5] <- sum(ext)/length(alpha)#
+	pms[,6] <- sum(ext.emp)/length(alpha)#
+	pms[,7] <- sum(rowSums(H[pm.yr:ny,]) < (sub*0.90))/(ny - pm.yr +1)#
+	pms[,8] <- sd(H[pm.yr:ny,])/mean(H[pm.yr:ny,]) #
+	pms[,9] <- sum(trib.gl)/length(alpha) #
+	list(S=S[,],N=Ntot[,],H=H[,],PMs=pms)#
+}
+out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
+out
+out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
+out
+#########################################################################################
+# close_loop_sims.R#
+##
+# Closed-loop simulation of alternative harvest policies for Kuskokwim Chinook#
+# July 5, 2019#
+# Author: B. Connors (DFO)#
+#        #
+#########################################################################################
+#
+# --- Set common conditions for simulations  --------------------------------------------#
+num.sims = 500 # number of Monte Carlo trials#
+ny = 50 # number of years in forward simulation#
+pm.yr <- ny-20#
+for.error <- 0.27 #
+OU <- 0.1 #
+#
+# --- Create array to store outcomes ----------------------------------------------------#
+harvest_goal <- seq(1000,100000,length.out=40)#
+egfloor <- seq(1,100000,length.out=40)#
+sim.outcomes <- array(NA,dim=c(length(egfloor),9, length(harvest_goal),num.sims))#
+sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goal),num.sims))#
+#
+# --- Stationary Ricker SR dynamics ----------------------------------------------------#
+#
+	# set structural form of SR relationship#
+	SR_rel <-  "Ricker" #
+	dir.SR <- "F"#
+	SR_devs <- array(1,dim=c(ny,2,13))#
+	# run simulations#
+	ptm <- proc.time()#
+	for (w in 1:length(harvest_goal)){#
+		for (l in 1: num.sims){#
+			draw <- sample(10000,1)#
+			alpha <- process.iteration(samps[draw,])$alpha#
+			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}#
+			beta <- process.iteration(samps[draw,])$beta#
+			Ro <- log(alpha)/beta#
+			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R#
+			mat <- process.iteration(samps[draw,])$pis#
+			Rec <- process.iteration(samps[draw,])$R#
+			Spw <- process.iteration(samps[draw,])$S#
+			lst.resid <- process.iteration(samps[draw,])$last_resid#
+			phi <- process.iteration(samps[draw,])$phi#
+			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)#
+			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)#
+			expan <- 1/(rnorm(1,0.56,0.05))#
+			for (k in 1:length(egfloor)){#
+				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)#
+				sim.outcomes[k,,w,l] <- out$PMs#
+				sim.outcomes.spw.time[,,k,w,l] <- out$S#
+			}#
+		}	#
+	}	#
+(proc.time() - ptm)/60#
+#
+saveRDS(sim.outcomes,"outputs/base_sims.ricker")  #
+saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.ricker")    #
+#
+# --- Time-varying Ricker SR dynamics ----------------------------------------------------#
+#
+	# set structural form of SR relationship#
+	SR_rel <-  "Ricker" #
+	dir.SR <- "T"#
+	SR_devs  <- SR_para_devs(apply(samps[,1:13],c(2),quantile,probs=c(0.5),na.rm=T),#
+							 apply(samps[,14:26],c(2),quantile,probs=c(0.5),na.rm=T),#
+							 5,35,ny)#
+	# run simulations#
+	ptm <- proc.time()#
+	for (w in 1:length(harvest_goal)){#
+		for (l in 1: num.sims){#
+			draw <- sample(10000,1)#
+			alpha <- process.iteration(samps[draw,])$alpha#
+			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}#
+			Ro <- log(alpha)/beta#
+			beta <- process.iteration(samps[draw,])$beta#
+			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R#
+			mat <- process.iteration(samps[draw,])$pis#
+			Rec <- process.iteration(samps[draw,])$R#
+			Spw <- process.iteration(samps[draw,])$S#
+			lst.resid <- process.iteration(samps[draw,])$last_resid#
+			phi <- process.iteration(samps[draw,])$phi#
+			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)#
+			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)#
+			expan <- 1/(rnorm(1,0.56,0.05))#
+			for (k in 1:length(egfloor)){#
+				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)#
+				sim.outcomes[k,,w,l] <- out$PMs#
+				sim.outcomes.spw.time[,,k,w,l] <- out$S#
+			}#
+		}	#
+	}	#
+(proc.time() - ptm)/60#
+#
+saveRDS(sim.outcomes,"outputs/base_sims.rickerTV")  #
+saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")  #
+#
+# --- Time-varying Beverton-Holt SR dynamics ----------------------------------------------------#
+#
+	# set structural form of SR relationship#
+	SR_rel <-  "Beverton-Holt" #
+	BH.alpha.CV <- 0.4#
+	period <- 12#
+	dir.SR <- "F"#
+	SR_devs <- array(1,dim=c(ny,2,13))#
+	# run simulations!#
+	ptm <- proc.time()#
+	for (w in 1:length(harvest_goal)){#
+		for (l in 1: num.sims){#
+			draw <- sample(10000,1)#
+			alpha <- process.iteration(samps[draw,])$alpha#
+			if(SR_rel == "Beverton-Holt"){alpha <- alpha*0.7424242}#
+			Ro <- log(alpha)/beta#
+			beta <- process.iteration(samps[draw,])$beta#
+			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R#
+			mat <- process.iteration(samps[draw,])$pis#
+			Rec <- process.iteration(samps[draw,])$R#
+			Spw <- process.iteration(samps[draw,])$S#
+			lst.resid <- process.iteration(samps[draw,])$last_resid#
+			phi <- process.iteration(samps[draw,])$phi#
+			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)#
+			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)#
+			expan <- 1/(rnorm(1,0.56,0.05))#
+			for (k in 1:length(egfloor)){#
+				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,#
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)#
+				sim.outcomes[k,,w,l] <- out$PMs#
+				sim.outcomes.spw.time[,,k,w,l] <- out$S#
+			}#
+		}	#
+	}	#
+(proc.time() - ptm)/60#
+#
+saveRDS(sim.outcomes,"outputs/base_sims.bhTV")  #
+saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.bhTV")

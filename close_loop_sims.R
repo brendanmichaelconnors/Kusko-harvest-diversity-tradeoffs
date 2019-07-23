@@ -44,10 +44,11 @@ sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goa
 			phi <- process.iteration(samps[draw,])$phi
 			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
 			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+			expan <- 1/(rnorm(1,0.56,0.05))
 	
 			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
-							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs)
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
 			}
@@ -84,10 +85,11 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.ricker")
 			phi <- process.iteration(samps[draw,])$phi
 			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
 			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+			expan <- 1/(rnorm(1,0.56,0.05))
 	
 			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
-							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs)
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
 			}
@@ -124,10 +126,11 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")
 			phi <- process.iteration(samps[draw,])$phi
 			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
 			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+			expan <- 1/(rnorm(1,0.56,0.05))
 			
 			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
-							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs)
+							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
 			}
