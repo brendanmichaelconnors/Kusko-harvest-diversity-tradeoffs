@@ -30,23 +30,23 @@ sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goa
 	# run simulations
 	ptm <- proc.time()
 	for (w in 1:length(harvest_goal)){
-		for (l in 1: num.sims){
-			draw <- sample(10000,1)
-			alpha <- process.iteration(samps[draw,])$alpha
-			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
-			beta <- process.iteration(samps[draw,])$beta
-			Ro <- log(alpha)/beta
-			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
-			mat <- process.iteration(samps[draw,])$pis
-			Rec <- process.iteration(samps[draw,])$R
-			Spw <- process.iteration(samps[draw,])$S
-			lst.resid <- process.iteration(samps[draw,])$last_resid
-			phi <- process.iteration(samps[draw,])$phi
-			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
-			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
-			expan <- 1/(rnorm(1,0.56,0.05))
+	  for (k in 1:length(egfloor)){
+	    for (l in 1: num.sims){
+  			draw <- sample(10000,1)
+  			alpha <- process.iteration(samps[draw,])$alpha
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
+  			beta <- process.iteration(samps[draw,])$beta
+  			Ro <- log(alpha)/beta
+  			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
+  			mat <- process.iteration(samps[draw,])$pis
+  			Rec <- process.iteration(samps[draw,])$R
+  			Spw <- process.iteration(samps[draw,])$S
+  			lst.resid <- process.iteration(samps[draw,])$last_resid
+  			phi <- process.iteration(samps[draw,])$phi
+  			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
+  			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+  			expan <- 1/(rnorm(1,0.56,0.05))
 	
-			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
@@ -71,23 +71,23 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.ricker")
 	# run simulations
 	ptm <- proc.time()
 	for (w in 1:length(harvest_goal)){
-		for (l in 1: num.sims){
-			draw <- sample(10000,1)
-			alpha <- process.iteration(samps[draw,])$alpha
-			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
-			Ro <- log(alpha)/beta
-			beta <- process.iteration(samps[draw,])$beta
-			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
-			mat <- process.iteration(samps[draw,])$pis
-			Rec <- process.iteration(samps[draw,])$R
-			Spw <- process.iteration(samps[draw,])$S
-			lst.resid <- process.iteration(samps[draw,])$last_resid
-			phi <- process.iteration(samps[draw,])$phi
-			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
-			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
-			expan <- 1/(rnorm(1,0.56,0.05))
+	  for (k in 1:length(egfloor)){
+	    for (l in 1: num.sims){
+  			draw <- sample(10000,1)
+  			alpha <- process.iteration(samps[draw,])$alpha
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
+  			Ro <- log(alpha)/beta
+  			beta <- process.iteration(samps[draw,])$beta
+  			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
+  			mat <- process.iteration(samps[draw,])$pis
+  			Rec <- process.iteration(samps[draw,])$R
+  			Spw <- process.iteration(samps[draw,])$S
+  			lst.resid <- process.iteration(samps[draw,])$last_resid
+  			phi <- process.iteration(samps[draw,])$phi
+  			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
+  			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+  			expan <- 1/(rnorm(1,0.56,0.05))
 	
-			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
@@ -112,23 +112,23 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")
 	# run simulations!
 	ptm <- proc.time()
 	for (w in 1:length(harvest_goal)){
-		for (l in 1: num.sims){
-			draw <- sample(10000,1)
-			alpha <- process.iteration(samps[draw,])$alpha
-			if(SR_rel == "Beverton-Holt"){alpha <- alpha*0.7424242}
-			Ro <- log(alpha)/beta
-			beta <- process.iteration(samps[draw,])$beta
-			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
-			mat <- process.iteration(samps[draw,])$pis
-			Rec <- process.iteration(samps[draw,])$R
-			Spw <- process.iteration(samps[draw,])$S
-			lst.resid <- process.iteration(samps[draw,])$last_resid
-			phi <- process.iteration(samps[draw,])$phi
-			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
-			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
-			expan <- 1/(rnorm(1,0.56,0.05))
+	  for (k in 1:length(egfloor)){
+	    for (l in 1: num.sims){
+  			draw <- sample(10000,1)
+  			alpha <- process.iteration(samps[draw,])$alpha
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha*0.7424242}
+  			Ro <- log(alpha)/beta
+  			beta <- process.iteration(samps[draw,])$beta
+  			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
+  			mat <- process.iteration(samps[draw,])$pis
+  			Rec <- process.iteration(samps[draw,])$R
+  			Spw <- process.iteration(samps[draw,])$S
+  			lst.resid <- process.iteration(samps[draw,])$last_resid
+  			phi <- process.iteration(samps[draw,])$phi
+  			sub <- ifelse(harvest_goal[w]<45000,harvest_goal[w],45000)
+  			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
+  			expan <- 1/(rnorm(1,0.56,0.05))
 			
-			for (k in 1:length(egfloor)){
 				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs

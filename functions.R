@@ -1,7 +1,7 @@
 ########################################################################################
 # functions.R
 #
-# Functions for closed loop simulations and assocaited analyses 
+# Functions for closed loop simulations and associated analyses 
 # July 5, 2019
 # Author: B. Connors (DFO) and B. Staton (CRITFC)
 #        
@@ -51,12 +51,11 @@ SC.eq <- function(U,a,b){
 # Multi-stock simulation function with alternative structural forms
 #------------------------------------------------------------------------------#
 # ny <- the number of years
-# Ro <- the sub-stock recruiment at time zero
-# vcov.matrix <- the expected correlation in recruitment within and among stocks
+# vcov.matrix <- process error variance-covarance matrix
 # phi <- the expected correlation through time
-# mat <- stock-specific maturation schedules
-# alpha <- sub-stock productivity (not in log space)
-# bet <- sub-stock density depedence 
+# mat <- maturation schedule
+# alpha <- sub-stock productivity (NOT in log space)
+# beta <- sub-stock density depedence 
 # sub <- subsistence requirement
 # com <- maximum commercial harvest
 # egfloor <- escapement goal
@@ -73,8 +72,8 @@ SC.eq <- function(U,a,b){
 # SR.devs <- deviations in SR parameters by time step if dir.SR == "Y"
 # expan <- expantion of system to account for unmodelled spawning populations
 
-process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR.devs,expan){
-	ns = length(Ro) #number of sub-stocks
+process = function(ny,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan){
+	ns = length(alpha) #number of sub-stocks
 	for.error = for.error
 	OU = OU
 	m.alpha <- alpha
@@ -105,26 +104,29 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 	predR = Ntot
 	
 	# populate first few years with realized states
-	R[4,] = exp(log(alpha[]*S[4,]*exp(-beta[]*S[4,])) + phi* lst.resid) * exp(epi[4,])
-	v[4,] = log(R[4,])-log(alpha[]*S[4,]*exp(-beta[]*S[4,]))
+	R[4,] = alpha[]*S[4,]*exp(-beta[]*S[4,]+(phi*lst.resid)+epi[4,])
+	predR[4,] = alpha[]*S[4,]*exp(-beta[]*S[4,])
+	v[4,] = log(R[4,])-log(predR[4,])
+	v[v[,]=='NaN'] <- 0
 	
 	for(i in 5:7){
-		R[i,] = exp(log(alpha[]*S[i,]*exp(-beta[]*S[i,])) + phi* v[i-1,]) * exp(epi[i,])
-		v[i,] = log(R[i,])-log(alpha[]*S[i,]*exp(-beta[]*S[i,]))		
+	  R[i,] = alpha[]*S[i,]*exp(-beta[]*S[i,]+phi*v[i-1,]+epi[i,])
+	  predR[i,] = alpha[]*S[i,]*exp(-beta[]*S[i,])
+	  v[i,] = log(R[i,])-log(predR[i,])
+	  v[v[,]=='NaN'] <- 0	
 	}
-
+	
 	N[4:7,1,]=R[4:7-(3),] * mat[1]
 	N[5:7,2,]=R[5:7-(4),] * mat[2]
 	N[6:7,3,]=R[6:7-(5),] * mat[3]
 	N[7,4,]=R[7-(6),] * mat[4]
 	
-	# Loop through years of simulation	  
-	for(i in (7+1):ny){ 
+	# Loop through years of simulation	
+	for(i in (7+1):ny){
 		N[i,1,] = R[i-(4),] * mat[1]
 		N[i,2,] = R[i-(5),] * mat[2]
 		N[i,3,] = R[i-(6),] * mat[3]
 		N[i,4,] = R[i-(7),] * mat[4]
-		       
 		Ntot[i,] = colSums(N[i,,])
 
 		# apply harvest control rule
@@ -140,7 +142,6 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 		S_exp[S_exp<0] = 0
 		S_exp[S_exp<50] = 0
 		S[i,] = S_exp
-			    
 		if (dir.SR == "T") {
 			alpha <- m.alpha* SR_devs[i,1,]
 			beta <- m.beta* SR_devs[i,2,]
@@ -152,16 +153,16 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 			predR[i,] = alpha[]*S[i,]*exp(-beta[]*S[i,])
 			v[i,] = log(R[i,])-log(predR[i,])
 			v[v[,]=='NaN'] <- 0
-		    }
+		      }
 	
 		if (SR_rel == "Beverton-Holt"){
 			R[i,] = alpha.time[i,]*S[i,]/(1+(alpha.time[i,]/beta.tim[])*S[i,])*exp(phi*v[i-1,]+epi[i,])
 			predR[i,] = alpha.time[i,]*S[i,]/(1+(alpha.time[i,]/beta.tim[])*S[i,])
 			v[i,] = log(R[i,])-log(predR[i,])
 			v[v[,]=='NaN'] <- 0
-		    }
-	    }
-	  
+		     }
+	  }
+ 
 	# Output
 	# Performance measures:
 	#	1: escapement
@@ -208,7 +209,11 @@ process = function(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor,pm.yr,fo
 	pms[,8] <- sd(H[pm.yr:ny,])/mean(H[pm.yr:ny,]) 
 	pms[,9] <- sum(trib.gl)/length(alpha) 
 	
-	list(S=S[,],N=Ntot[,],H=H[,],PMs=pms)
+	if (SR_rel == "Beverton-Holt"){
+	  list(S=S[,],R=R[,], N=Ntot[,],H=H[,],BH_alpha = alpha.time, BH_beta = beta.tim, PMs=pms)}
+	else{
+	  list(S=S[,],R=R[,], N=Ntot[,],H=H[,],PMs=pms)}
+	
 }
 
 #------------------------------------------------------------------------------#
