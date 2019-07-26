@@ -1,0 +1,99 @@
+ricker_a <- log(7.17)
+ricker_b <- -0.0000098718
+
+ricker_para <- array(NA,dim=c(2,100))
+ricker_pred <- matrix(NA,100,100)
+
+for(i in 1:100){
+  bh_sim_1 <- sr_sim(ny = 50,
+                 phi = 0,
+                 rec_sd = 0.2,
+                 mat = c(0.15, 0.4, 0.4, 0.05),
+                 alpha = exp(ricker_a),
+                 beta = (ricker_b * -1),
+                 U = 0.6,
+                 OU = 0.1,
+                 Spw = ricker_a/(ricker_b*-1),
+                 Rec = rep(ricker_a/(ricker_b*-1),8),
+                 SR_rel = "Beverton-Holt",
+                 period = 14,
+                 alpha.scalar = 1.35,
+                 BH.alpha.CV = 0.6)
+
+  spawners <- bh_sim_1 $S[10:50]
+  recruits <- bh_sim_1 $R[10:50]
+
+  ricker_fit <- lm(log(recruits/spawners)~spawners)
+  ricker_para[1,i] <- ricker_fit$coefficients[1]
+  ricker_para[2,i] <- ricker_fit$coefficients[2]
+  
+  spawn <- seq(1,300000,length.out=100)
+  for (j in 1:100){ricker_pred[i,j] <- exp(ricker_para[1,i] )*spawn[j]*exp(ricker_para[2,i]*spawn[j]) }
+  
+}
+rec.pred <- apply(ricker_pred,c(2),quantile,probs=c(0.5),na.rm=T)
+BH_prod <- bh_sim_1$BH_prod[10:50]
+BH_prod_col <- viridis(7)
+
+time_prod_col <- c(BH_prod_col[1],
+                   BH_prod_col,
+                   rev(BH_prod_col),
+                   BH_prod_col,
+                   rev(BH_prod_col),
+                   BH_prod_col,
+                   rev(BH_prod_col))[1:41]
+rbind(BH_prod,time_prod_col)
+
+###
+ricker_pred_k <- matrix(NA,100,1)
+spawn <- seq(1,300000,length.out=100)
+for (i in 1:100){ricker_pred_k[i] <- exp(ricker_a )*spawn[i]*exp(ricker_b*spawn[i]) }
+
+
+par(mfrow=c(1,2),bty="o", mar=c(4,4,1,1))#set dimensions to plots
+
+# panel A
+  plot( x = spawn/1000,
+        y = ricker_pred_k/1000,
+        type = "l",
+        lwd = 2,
+        ylab = "recruits (000s)",
+        xlab = "spawners (000s)",
+        yaxt = "n",
+        ylim = c(0,350))
+  axis(2,las=2)
+  box(col="grey")
+  
+  points(spawn/1000,
+         rec.pred/1000,
+         type="l",
+         col="red",
+         lwd=2)
+  
+  legend(100,370,
+         c("Ricker","Time-varying Beverton-Holt"),
+         lwd=2,
+         col=c("black","red"),
+         cex=0.8, 
+         bty="n")
+
+# panel B
+  plot( x = seq(10:50),
+        y = BH_prod,
+        type = "l",
+        lwd = 2,
+        ylab = "productivity",
+        xlab = "time",
+        yaxt = "n",
+        col="grey",
+        ylim=c(1,17))
+  
+  axis(2,las=2)
+  box(col="grey")
+  
+  points(seq(10:50),
+         BH_prod,
+         col=time_prod_col,
+         pch=16)
+  
+  
