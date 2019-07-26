@@ -8,7 +8,7 @@
 ########################################################################################
 
 # --- Set common conditions for simulations  --------------------------------------------
-num.sims = 500 # number of Monte Carlo trials
+num.sims = 100 # number of Monte Carlo trials
 ny = 50 # number of years in forward simulation
 pm.yr <- ny-20
 for.error <- 0.27 
@@ -34,9 +34,8 @@ sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goa
 	    for (l in 1: num.sims){
   			draw <- sample(10000,1)
   			alpha <- process.iteration(samps[draw,])$alpha
-  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 1.375}
   			beta <- process.iteration(samps[draw,])$beta
-  			Ro <- log(alpha)/beta
   			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
   			mat <- process.iteration(samps[draw,])$pis
   			Rec <- process.iteration(samps[draw,])$R
@@ -47,7 +46,7 @@ sim.outcomes.spw.time <- array(NA,dim=c(ny,13,length(egfloor),length(harvest_goa
   			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
   			expan <- 1/(rnorm(1,0.56,0.05))
 	
-				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
+				out <- process(ny,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
@@ -75,8 +74,7 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.ricker")
 	    for (l in 1: num.sims){
   			draw <- sample(10000,1)
   			alpha <- process.iteration(samps[draw,])$alpha
-  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 0.7424242}
-  			Ro <- log(alpha)/beta
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha* 1.375}
   			beta <- process.iteration(samps[draw,])$beta
   			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
   			mat <- process.iteration(samps[draw,])$pis
@@ -88,7 +86,7 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.ricker")
   			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
   			expan <- 1/(rnorm(1,0.56,0.05))
 	
-				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
+				out <- process(ny,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
@@ -104,7 +102,7 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")
 
 	# set structural form of SR relationship
 	SR_rel <-  "Beverton-Holt" 
-	BH.alpha.CV <- 0.4
+	BH.alpha.CV <- 0.6
 	period <- 12
 	dir.SR <- "F"
 	SR_devs <- array(1,dim=c(ny,2,13))
@@ -116,8 +114,7 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")
 	    for (l in 1: num.sims){
   			draw <- sample(10000,1)
   			alpha <- process.iteration(samps[draw,])$alpha
-  			if(SR_rel == "Beverton-Holt"){alpha <- alpha*0.7424242}
-  			Ro <- log(alpha)/beta
+  			if(SR_rel == "Beverton-Holt"){alpha <- alpha*1.375}
   			beta <- process.iteration(samps[draw,])$beta
   			vcov.matrix <- process.iteration(samps[draw,])$Sigma_R
   			mat <- process.iteration(samps[draw,])$pis
@@ -129,7 +126,7 @@ saveRDS(sim.outcomes.spw.time,"outputs/base_sims_projections.rickerTV")
   			com <- ifelse(harvest_goal[w]<45000,0,harvest_goal[w]-45000)
   			expan <- 1/(rnorm(1,0.56,0.05))
 			
-				out <- process(ny,Ro,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
+				out <- process(ny,vcov.matrix,phi,mat,alpha,beta,sub,com,egfloor[k],pm.yr,
 							   for.error,OU,Rec,Spw,lst.resid,SR_rel,BH.alpha.CV,period,dir.SR,SR_devs,expan)
 				sim.outcomes[k,,w,l] <- out$PMs
 				sim.outcomes.spw.time[,,k,w,l] <- out$S
