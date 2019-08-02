@@ -8,7 +8,7 @@
 ########################################################################################
 
 # --- Set common conditions for simulations  --------------------------------------------
-num.sims = 100 # number of Monte Carlo trials
+num.sims = 500 # number of Monte Carlo trials
 ny = 50 # number of years in forward simulation
 pm.yr <- ny-20
 for.error <- 0.27 
