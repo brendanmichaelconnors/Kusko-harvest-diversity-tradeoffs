@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------#
 # Code to run simulations and generate figures
 # Requires posterior samples in the `input` folder
-# ** make.R last run on 2019-07-05 ** 
+# ** make.R last run on 2019-08-02 ** 
 #------------------------------------------------------------------------------#
 rm(list = ls())
 
@@ -15,3 +15,6 @@ source("simulation_summary.Rmd")
 
 # --- equilibrium figures  ----------------------------------------------------
 source("figures.R")
+
+# --- summarize simmulations to justify parameterization of time-varying BH ---
+source("appendix_A.Rmd")
