@@ -423,8 +423,10 @@ sr_sim = function(ny,phi,rec_sd, mat,alpha,beta,U,OU,Spw,Rec,SR_rel,BH.alpha.CV,
     Ntot[i,] = sum(N[i,,])
     
     # apply harvest
+    har_rate <- sub_hcr(sub, 0, egfloor, Ntot[i,],0)
+    #har_rate = U
     outcome_error <- (1+rnorm(1,0,OU))
-    H[i,] =  U*Ntot[i,]*ifelse(outcome_error<0, 0, outcome_error) 
+    H[i,] =  har_rate*Ntot[i,]*ifelse(outcome_error<0, 0, outcome_error) 
     S_exp = Ntot[i,]-H[i,]
     S_exp[S_exp<0] = 0
     S_exp[S_exp<50] = 0
