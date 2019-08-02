@@ -27,6 +27,6 @@ library(plyr)
 #------------------------------------------------------------------------------#
 
 #samps = read.csv("inputs/Posterior_Samples_alt_vuln_S_trunc.csv")
-#samps = read.csv("inputs/Posterior_Samples_alt_ess_S_trunc.csv")
-samps = read.csv("inputs/Posterior_Samples_base_S_trunc.csv")
+samps = read.csv("inputs/Posterior_Samples_alt_ess_S_trunc.csv")
+#samps = read.csv("inputs/Posterior_Samples_base_S_trunc.csv")
 samps = as.matrix(samps)
