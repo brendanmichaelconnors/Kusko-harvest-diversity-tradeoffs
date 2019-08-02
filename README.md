@@ -19,8 +19,8 @@ Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable
 
 - `figures.R`: Generate figures not associated with simulations (e.g., equilibrium trade-offs, populaiton diversity )
   
-- `Simulation_summary.Rmd`: R Markdown doc that summarizes simulations, and generates figures for manuscript (in `images` folder)
+- `simulation_summary.Rmd`: R Markdown doc that summarizes simulations, and generates figures for manuscript (in `images` folder)
 
-- `ricker_to_bevholt.R`: a simulation of the system under Beverton-Holt and Ricker stock-recruitment formulations, and  a range of alpha multipliers for the BH formulation, to estimate what the multiplier should be to generate equivilent equilibrium conditions (i.e., escapements). This allows comparisons of the trade-offs that emerge under the Beverton-Holt and Ricker stock-recruitment formulations to not be confounded by differences in equilibrium states.
+- `appendix_A.R`: R Markdown doc that details of the stationary Ricker to time-varying Beverton-Holt formulation we use and  simulations to justify its parameterization in our closed-loop simulations. 
 
 
