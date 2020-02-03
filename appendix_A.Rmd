@@ -13,6 +13,9 @@ fig_caption: true
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  fig.path = "images/"
+)
 source("load.R")
 ```
 ####Appendix A: Stationary Ricker to cyclical Beverton-Holt spawner-recruit formulation
@@ -69,7 +72,7 @@ time_prod_col <- c(BH_prod_col[1],
 
 
 
-```{r  fig1, echo=FALSE, results="hide",fig.height = 3.25, fig.width = 5, fig.align = "center", fig.cap="**Figure 1.** Spawner-recruitment data simulated by a Beverton-Holt type relationship with time-varying productivity (colors). The black line is the Ricker type spawner-recruitment relationship estimated from the data, which implies that there is overcompensation when in fact there is none."}
+```{r  fig1, echo=FALSE, results="hide",fig.height = 3.25, fig.width = 5, fig.align = "center", dpi=400,fig.cap="**Figure 1.** Spawner-recruitment data simulated by a Beverton-Holt type relationship with time-varying productivity (colors). The black line is the Ricker type spawner-recruitment relationship estimated from the data, which implies that there is overcompensation when in fact there is none."}
 
 split.screen(rbind(
 c(0,1,0,1), #1
@@ -167,7 +170,7 @@ BH.alpha.CV <- c(0.2,0.3,0.4,0.5,0.6,0.7,0.8)
 # }
 # saveRDS(ricker_para_dev, "BH_sims")
 
-sim_output <- readRDS("output/BH_sims")
+sim_output <- readRDS("outputs/BH_sims")
 
 xx <- apply(sim_output,c(1,2,3,4),quantile,probs=c(0.5),na.rm=T)
 
@@ -177,7 +180,7 @@ cv.0.6 <- xx[,1:20,1:20,5]
 cv.0.8 <- xx[,1:20,1:20,7]
 ```
 
-```{r  fig2, echo=FALSE, fig.height = 5, fig.width = 8, fig.align = "center", fig.cap="**Figure 2.** Effects of *f* (y-axis), *A* (panels) and alpha scalar (x-axis) on model based (Ricker) estimates of instrinsic productivty (top row) and magnitue of density dependence (bottom row) fit to simulated spawner-recruit data from a model with time-varying Beverton-Holt relationship. The Z-axis is the median magnitude of proportional error (i.e., estimated / true) across 1000 trials for each combination of *f*, *A* and alpha scalar."}
+```{r  fig2, echo=FALSE, fig.height = 5, fig.width = 8, dpi=400,fig.align = "center", fig.cap="**Figure 2.** Effects of *f* (y-axis), *A* (panels) and alpha scalar (x-axis) on model based (Ricker) estimates of instrinsic productivty (top row) and magnitue of density dependence (bottom row) fit to simulated spawner-recruit data from a model with time-varying Beverton-Holt relationship. The Z-axis is the median magnitude of proportional error (i.e., estimated / true) across 1000 trials for each combination of *f*, *A* and alpha scalar."}
 
 par(mfrow=c(2,3),bty="o", mar=c(2,2,2,2.5),oma=c(2,2,1,1.5))
 
@@ -319,7 +322,7 @@ Figure 2 suggest that, generally speaking, estimates of $\alpha$ are biased low 
 
 We then further explored the extent to which this combination of parameter values generates an apparent spawner-recruit relationship that qualitatively matches the empirical Kuskokwim one. To do this we simulated 1000 spawner-recruitent datasets under the BH_cycl formulation with the period (*f*), amplitude (*A*) and productivity scalar ($\delta$) equal to 14, 0.6 and 1.4, respectively (Figure 3B illustrates the resulting time-series of productivity). For each simulation we then fit a Ricker spawner-recruitment relationship to the data and then summarized the predicted relationship across the 1000 sumulations relative to the observed Ricker spawner-recruitment relationship for the Kuskokwim aggregate (Figure 3A). These simulations suggests that this combination of parameter values result in a spawner-recruitment relationship with apparent overcompensation of a magnitude similar to that observerd in the Kuskokwim.   
 
-```{r  fig3, echo=FALSE, fig.height = 3, fig.width = 8, fig.align = "center", fig.cap="**Figure 3.**(A) Observed (Ricker black line) spawner-recruitment relationship in the Kuskokwim and simulated relationship (median and 95th percentiles) assuming a Beverton-Holt spawner-recruitment relationhsip with time-varying productivity (B)."}
+```{r  fig3, echo=FALSE, fig.height = 3, fig.width = 8, fig.align = "center", dpi=400, fig.cap="**Figure 3.**(A) Observed (Ricker black line) spawner-recruitment relationship in the Kuskokwim and simulated relationship (median and 95th percentiles) assuming a Beverton-Holt spawner-recruitment relationhsip with time-varying productivity (B)."}
 
 ricker_a <- log(7.17)
 ricker_b <- -0.0000098718
