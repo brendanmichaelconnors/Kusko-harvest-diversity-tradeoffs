@@ -1,6 +1,6 @@
 Code to run closed-loop simulations of Kukskokwim "like" system to evaluate the performance of alternative management procedures in the face of environmental stochasticity and uncertainty in drivers of recruitment:
 
->Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. Under review. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook.
+>Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. In press. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook. Canadian Journal of Fisheries and Aquatic Sciences.
 
 Posterior samples required to parameterize the closed loop simulations are available upon request from brendan.connors@dfo-mpo.gc.ca and are from analyses described in:
 
