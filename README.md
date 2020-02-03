@@ -1,10 +1,10 @@
-Work in progress version of code to run closed-loop simulations of Kukskokwim "like" system to evaluate the performance of alternative management procedures in the face of environmental stochasticity and uncertainty in drivers of recruitment:
+Code to run closed-loop simulations of Kukskokwim "like" system to evaluate the performance of alternative management procedures in the face of environmental stochasticity and uncertainty in drivers of recruitment:
 
->Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. In preparation. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook.
+>Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. In press. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook. Canadian Journal of Fisheries and Aquatic Sciences.
 
 Posterior samples required to parameterize the closed loop simulations are available upon request from brendan.connors@dfo-mpo.gc.ca and are from analyses described in:
 
->Staton B., M. Catalano, B.M. Connors, L. Coggins, M. Jones, C. Walters, S. Fleischman and D. Gwinn. In preparation. Evaluation of methods for quantifying population diversity in mixed-stock Pacific salmon fisheries.
+>Staton B., M. Catalano, B.M. Connors, L. Coggins, M. Jones, C. Walters, S. Fleischman and D. Gwinn. Under review. Evaluation of methods for quantifying population diversity in mixed-stock Pacific salmon fisheries.
 
 Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable Salmon Initiative](https://www.aykssi.org/)
 
@@ -21,6 +21,6 @@ Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable
   
 - `simulation_summary.Rmd`: R Markdown doc that summarizes simulations, and generates figures for manuscript (in `images` folder)
 
-- `appendix_A.R`: R Markdown doc that details of the stationary Ricker to time-varying Beverton-Holt formulation we use and  simulations to justify its parameterization in our closed-loop simulations. 
+- `appendix_A.R`: R Markdown doc that details the stationary Ricker to time-varying Beverton-Holt formulation we used, and simulations to justify its parameterization in our closed-loop simulations. 
 
 
