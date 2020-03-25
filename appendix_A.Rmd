@@ -20,7 +20,7 @@ source("load.R")
 ```
 ####Appendix A: Stationary Ricker to cyclical Beverton-Holt spawner-recruit formulation
 
->Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. In preparation. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook.
+>[Connors B.M., Staton B., Coggins L., Walters C., Jones M., Gwinn D., Catalano M. and S. Fleischman. In press. Incorporating harvest – population diversity trade-offs into harvest policy analyses of salmon management in large river basins. Canadian Journal of Fisheries and Aquatic Sciences.](https://doi.org/10.1139/cjfas-2019-0282)
 
 Our baseline simulations  assumed that recruitment dynamics are governed by a stationary Ricker-type spawner-recruitment relationship with overcompensation at high spawner abundances (equations 1-3 in main text). This is the state of nature that is currently assumed by fishery managers in the Kuskokwim and is also common assumed in other salmon systems. We also considered an alternative recruitment hypothesis that assumed that low frequency regime shifts gave rise to the appearance of overcompensation, when in fact none was present. Under this hypothesis we assumed that individual spawner-recruitment relationships were governed by Beverton-Holt dynamics with cyclical variation in population productivity (hereafter referred to as "BH_cycl").  
 

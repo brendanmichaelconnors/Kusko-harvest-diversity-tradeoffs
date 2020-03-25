@@ -1,10 +1,10 @@
 Code to run closed-loop simulations of Kukskokwim "like" system to evaluate the performance of alternative management procedures in the face of environmental stochasticity and uncertainty in drivers of recruitment:
 
->Connors B. M., B. Staton, L. Coggins, C. Walters, M. Jones, D. Gwinn, M. Catalano and S. Fleischman. In press. Incorporating harvest-population diversity trade-offs into salmon management in large river basins: a case study of Kuskokwim River Chinook. Canadian Journal of Fisheries and Aquatic Sciences.
+>[Connors B.M., Staton B., Coggins L., Walters C., Jones M., Gwinn D., Catalano M. and S. Fleischman. In press. Incorporating harvest – population diversity trade-offs into harvest policy analyses of salmon management in large river basins. Canadian Journal of Fisheries and Aquatic Sciences.](https://doi.org/10.1139/cjfas-2019-0282)
 
-Posterior samples required to parameterize the closed loop simulations are available upon request from brendan.connors@dfo-mpo.gc.ca and are from analyses described in:
+Posterior samples required to condition the operating model in the closed loop simulations are available upon request from brendan.connors@dfo-mpo.gc.ca and are from analyses described in:
 
->Staton B., M. Catalano, B.M. Connors, L. Coggins, M. Jones, C. Walters, S. Fleischman and D. Gwinn. Under review. Evaluation of methods for quantifying population diversity in mixed-stock Pacific salmon fisheries.
+>[Staton B., M. Catalano, B.M. Connors, L. Coggins, M. Jones, C. Walters, S. Fleischman and D. Gwinn. In press. Evaluation of methods for quantifying population diversity in mixed-stock Pacific salmon fisheries. Canadian Journal of Fisheries and Aquatic Sciences.]( https://doi.org/10.1139/cjfas-2019-0281)
 
 Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable Salmon Initiative](https://www.aykssi.org/)
 
@@ -17,7 +17,7 @@ Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable
   
 - `close_loop_sims.R`: Run closed loop forwad simulations.
 
-- `figures.R`: Generate figures not associated with simulations (e.g., equilibrium trade-offs, populaiton diversity )
+- `figures.R`: Generate figures not associated with simulations (e.g., equilibrium trade-offs, populaiton diversity; in `figures` folder)
   
 - `simulation_summary.Rmd`: R Markdown doc that summarizes simulations, and generates figures for manuscript (in `images` folder)
 
