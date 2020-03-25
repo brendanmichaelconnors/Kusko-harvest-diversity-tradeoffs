@@ -36,11 +36,11 @@ outcomes.lower <- apply(outcomes,c(1,2,3),quantile,probs=c(0.25),na.rm=T)
 
 ```{r opts, echo = FALSE}
 knitr::opts_chunk$set(
-  fig.path = "images/"
+  fig.path = "figures/"
 )
 ```
 
-```{r  fig1, echo=FALSE,fig.height = 5.5, fig.width = 6.5, fig.align = "center"}
+```{r  fig1, echo=FALSE,fig.height = 5.5, fig.width = 6.5, fig.align = "center", dpi=400}
 par(mfrow=c(2,2),bty="o", mar=c(2,2,2,5),oma=c(2,2,1,1))
 
 #panel a - harvest
@@ -175,7 +175,7 @@ mtext("Harvest goal (000s)",side=2,outer=T,cex=1.1,line=0.75)
 ```
 Figure 1. **Predicted consequences of alternative harvest policies**. Each policy is defined by a combination of basin scale harvest (y-axis) and escapement goals (x-axis). Performance measures (z-axis) are calculated over the last 20 years of each Monte Carlo trial (500 in total), which project stock dynamics 50 years forward in time, and correspond to (A) median harvest (in thousands of Chinook salmon), (B) harvest stability (1/ coefficient of variation [CV] in harvest), (C) proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner target (S~MSY~) and (D) proportion of sub-stocks extirpated. Three illustrative harvest policies are overlaid on each panel: (1) a policy that seeks to maximize yield, (2) a fixed harvest policy corresponding to minimum subsistence needs and (3) a policy that seeks to reduce biological risks to sub-stocks while also achieving relatively high harvests. 
 
-```{r  fig2, echo=FALSE,fig.height = 5, fig.width = 4.5, fig.align = "center"}
+```{r  fig2, echo=FALSE,fig.height = 5, fig.width = 5, fig.align = "center", dpi=400}
 par(mfrow=c(2,2),bty="o", mar=c(1,2,2,4),oma=c(2,2.5,1,0))
 
 har <- c(((outcomes.med[,2,]/1000))[pol.1x.ind,pol.1y.ind],(outcomes.med[,2,]/1000)[pol.2x.ind,pol.2y.ind],(outcomes.med[,2,]/1000)[pol.3x.ind,pol.3y.ind])
@@ -186,7 +186,7 @@ B<-barplot(har,yaxt="n",ylim=c(0,160),col="light grey")
 ablineclip(v=0.7,y1=har.low[1], y2=har.up[1],lwd=2,col="grey")
 ablineclip(v=1.9,y1=har.low[2], y2=har.up[2],lwd=2,col="grey")
 ablineclip(v=3.1,y1=har.low[3], y2=har.up[3],lwd=2,col="grey")
-mtext("1     2     3",1,line=0.25)
+mtext("1       2       3",1,line=0.25)
 text(0.5,150,"(a)")
 
 axis(2,las=2)
@@ -204,7 +204,7 @@ ablineclip(v=3.1,y1= 1/cv.har.low[3], y2= 1/cv.har.up[3],lwd=2,col="grey")
 mtext("Harvest stability (1/CV)",2,line=3)
 text(0.5,0.95,"(b)")
 
-mtext("1     2     3",1,line=0.25)
+mtext("1       2       3",1,line=0.25)
 
 over <- c((outcomes.med[,9,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.med[,9,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.med[,9,]*100) [pol.3x.ind,pol.3y.ind])
 over.up <- c((outcomes.upper[,9,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.upper[,9,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.upper[,9,]*100) [pol.3x.ind,pol.3y.ind])
@@ -218,7 +218,7 @@ ablineclip(v=3.1,y1= over.low[3], y2= over.up[3],lwd=2,col="grey")
 mtext("Chance trib. goals met (%)",2,line=3)
 text(0.5,96,"(c)")
 
-mtext("1     2     3",1,line=0.25)
+mtext("1       2       3",1,line=0.25)
 
 ext <- c((outcomes.med[,6,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.med[,6,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.med[,6,]*100) [pol.3x.ind,pol.3y.ind])
 ext.up <- c((outcomes.upper[,6,]*100) [pol.1x.ind,pol.1y.ind],(outcomes.upper[,6,]*100) [pol.2x.ind,pol.2y.ind],(outcomes.upper[,6,]*100) [pol.3x.ind,pol.3y.ind])
@@ -232,13 +232,13 @@ ablineclip(v=3.1,y1= ext.low[3], y2= ext.up[3],lwd=2,col="grey")
 mtext("Populations extirpated (%)",2,line=3)
 text(0.5,38,"(d)")
 
-mtext("1     2     3",1,line=0.25)
+mtext("1       2       3",1,line=0.25)
 
-mtext("Policy",1,outer=T,adj=0.48,line=0.8,cex=1.1)
+mtext("Harvest policy",1,outer=T,adj=0.44,line=0.8,cex=1.1)
 ```
 Figure 2.**Tradeoffs between harvest policies**. Predicted ability of three alterative harvest policies (see Figure 1) to meet fishery (A: harvest and B: harvest stability), equity (B: proportion of sub-stock tributaries with spawner abundances that exceeded a tributary specific spawner goals) and conservation (C: proportion of sub-stocks extirpated) objectives. Each bar is the median (and 25th and 75th percentiles) performance of a given policy as calculated over the last 20 years of each Monte Carlo trial (500 in total). Contrasting policies within and among panels illustrates key tradeoffs in the system between harvest, equity and conservation, as well as asymmetry in them: for example, a 25% reduction in harvest (from Policy 1 to 3).
 
-```{r  fig3, echo=FALSE,fig.height = 5, fig.width = 6.5, fig.align = "center"}
+```{r  fig3, echo=FALSE,fig.height = 5, fig.width = 6.5, fig.align = "center", dpi=400}
 outcomes <- readRDS("outputs/base_sims.ricker")
 rk.outcomes.med <- apply(outcomes,c(1,2,3),quantile,probs=c(0.5),na.rm=T)
 rk.outcomes.upper <- apply(outcomes,c(1,2,3),quantile,probs=c(0.80),na.rm=T)
@@ -445,7 +445,7 @@ mtext("Harvest policy",1,line=1,outer=T)
 ```
 Figure 3. **Tradeoffs between harvest policies across alternative states of nature**.  Performance of alternative harvest policies (1 and 3 from Figure 1) across three alternative forms of underlying stock recruitment dynamics (grey bars: stationary Ricker type stock-recruitment relationship; blue bars: time varying Ricker stock-recruitment relationship; green bars: time varying Beverton-Holt stock-recruitment relationship).  These plots illustrate that while the general tradeoffs are robust to structural uncertainty in the underlying form of the stock-recruitment dynamics, the magnitude and asymmetry of the tradeoffs are sensitive to the underlying drivers of variation in recruitment.   
 
-```{r  fig4, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
+```{r  fig4, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center", dpi=400}
 
 # load time series simulation output (year 8 is first fully simulated year)
 base_timeseries <- readRDS("outputs/base_sims_projections.ricker")
@@ -509,7 +509,7 @@ ggplot(data=projections, aes(x=years, y=med.s/1000, group=Stock))+
 
 ```
 Figure 4. **Projections of spawner abundance**.  Projected median (thick line) and 50% spawner abundance under harvest policy 1.   
-```{r  fig5, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center"}
+```{r  fig5, echo=FALSE,fig.height = 4, fig.width = 8, fig.align = "center", dpi=400}
 # select policy (dimensions to array are: time step, sub-stock, escapement goal, harvest goal, MC trial),
 
 eg <- pol.2x.ind
