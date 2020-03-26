@@ -24,3 +24,4 @@ Project made possible by grant 1503 from the [Arctic-Yukon-Kuskokwim Sustainable
 - `appendix_A.R`: R Markdown doc that details the stationary Ricker to time-varying Beverton-Holt formulation we used, and simulations to justify its parameterization in our closed-loop simulations. 
 
 
+[![DOI](https://zenodo.org/badge/195446721.svg)](https://zenodo.org/badge/latestdoi/195446721)
