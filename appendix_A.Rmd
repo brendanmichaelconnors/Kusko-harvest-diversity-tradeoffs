@@ -14,7 +14,7 @@ fig_caption: true
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(
-  fig.path = "images/"
+  fig.path = "figures/"
 )
 source("load.R")
 ```
